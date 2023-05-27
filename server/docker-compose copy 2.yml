@@ -1,0 +1,219 @@
+version: "3"
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:latest
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./data/postgres:/data/postgres
+    env_file:
+      - docker.env
+ 
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    ports:
+      - "8080:80"
+    volumes:
+      - /data/pgadmin:/root/.pgadmin
+    env_file:
+      - docker.env
+    depends_on:
+      - postgres
+
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3-management
+    hostname: rabbitmq
+    volumes:
+      - /var/lib/rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    env_file:
+      - ./rabbitmq.env
+      
+  auth:
+    build:
+      context: .
+      dockerfile: ./apps/auth/Dockerfile
+      target: development
+    command: npm run start:dev auth
+    env_file:
+      - ./apps/auth/.env
+    depends_on:
+      - rabbitmq
+      - postgres
+    environment:
+      WATCHPACK_POLLING: "true"
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - '5000:5000'
+
+  aws:
+    build:
+      context: .
+      dockerfile: ./apps/aws/Dockerfile
+      target: development
+    command: npm run start:dev aws
+    env_file:
+      - ./apps/aws/.env
+    depends_on:
+      - rabbitmq
+      - auth
+      - parts
+    environment:
+      WATCHPACK_POLLING: "true"
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - '5001:5001'
+
+  car:
+    build:
+      context: .
+      dockerfile: ./apps/car/Dockerfile
+      target: development
+    command: npm run start:dev car
+    env_file:
+      - ./apps/car/.env
+    depends_on:
+      - rabbitmq
+      - auth
+    environment:
+      WATCHPACK_POLLING: "true"
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - '5002:5002'
+
+  car-service:
+    build:
+      context: .
+      dockerfile: ./apps/car-service/Dockerfile
+      target: development
+    command: npm run start:dev car-service
+    env_file:
+      - ./apps/car-service/.env
+    depends_on:
+      - rabbitmq
+      - auth
+    environment:
+      WATCHPACK_POLLING: "true"
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - '5003:5003'
+
+  chat-gpt:
+    build:
+      context: .
+      dockerfile: ./apps/chat-gpt/Dockerfile
+      target: development
+    command: npm run start:dev chat-gpt
+    env_file:
+      - ./apps/chat-gpt/.env
+    depends_on:
+      - rabbitmq
+      - auth
+    environment:
+      WATCHPACK_POLLING: "true"
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - '5004:5004'
+
+  parts:
+    build:
+      context: .
+      dockerfile: ./apps/parts/Dockerfile
+      target: development
+    command: npm run start:dev parts
+    env_file:
+      - ./apps/parts/.env
+    depends_on:
+      - rabbitmq
+      - auth
+    environment:
+      WATCHPACK_POLLING: "true"
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - '5005:5005'
+
+
+
+  es01:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.7.1
+    container_name: es01
+    environment:
+      - node.name=es01
+      - cluster.name=es-docker-cluster
+      - discovery.seed_hosts=es02,es03
+      - cluster.initial_master_nodes=es01,es02,es03
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "path.repo=/usr/src/app/elasticsearch/data"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./esdata/es01:/usr/src/app/elasticsearch/data
+    ports:
+      - 9200:9200
+      - 9300:9300
+
+  es02:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.7.1
+    container_name: es02
+    environment:
+      - node.name=es02
+      - cluster.name=es-docker-cluster
+      - discovery.seed_hosts=es01,es03
+      - cluster.initial_master_nodes=es01,es02,es03
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "path.repo=/usr/src/app/elasticsearch/data"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./esdata/es02:/usr/src/app/elasticsearch/data
+
+  es03:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.7.1
+    container_name: es03
+    environment:
+      - node.name=es03
+      - cluster.name=es-docker-cluster
+      - discovery.seed_hosts=es01,es02
+      - cluster.initial_master_nodes=es01,es02,es03
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "path.repo=/usr/src/app/elasticsearch/data"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./esdata/es03:/usr/src/app/elasticsearch/data
+
+volumes:
+  esdata:
+    driver: local
+  es01:
+    driver: local
+  es02:
+    driver: local
+  es03:
+    driver: local
