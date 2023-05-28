@@ -1,5 +1,6 @@
 import React from 'react'
 import { observer } from 'mobx-react-lite'
+import { IMAGE_CARD_SIZE } from '../../utils/constants';
 
 interface CarouselItemProps {
     description?: string,
@@ -8,13 +9,14 @@ interface CarouselItemProps {
 
 export const CarouselItem: React.FC<CarouselItemProps> = observer(({ description, children }) => {
     return (
-        <div className="border" style={{ minHeight: 300, minWidth: 300 }}>
+        <div className="border" style={{ minHeight: IMAGE_CARD_SIZE, minWidth: IMAGE_CARD_SIZE }}>
             <div className="child-container" style={{
-                height: 300,
-                width: 300,
+                height: IMAGE_CARD_SIZE,
+                width: IMAGE_CARD_SIZE,
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
+                overflow: "hidden"
             }}>
                 {children}
             </div>

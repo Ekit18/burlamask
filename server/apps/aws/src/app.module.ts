@@ -5,12 +5,14 @@ import { SequelizeModule } from "@nestjs/sequelize";
 import {
     AllExceptionsFilter, RmqService,
 } from "inq-shared-lib";
-import { PartsGuidesAwsModule } from "../../aws/src/parts-guides-aws/parts-guides-aws.module";
-import { PartsGuidesAwsRmqController } from "./parts-guides-aws/parts-guides-aws-rmq.controller";
-import { Images } from "./parts-guides-aws/images.model";
+import { ImageAwsModule } from "./image-aws/image-aws.module";
+import { Image } from "../model/images.model";
+import { ImageAwsRmqController } from "./image-aws/image-aws-rmq.controller";
+import { ImageAwsController } from "./image-aws/image-aws.controller";
+import { ImageSearchModule } from "./image-aws-search/image-search.module";
 
 @Module({
-    controllers: [PartsGuidesAwsRmqController],
+    controllers: [ImageAwsRmqController, ImageAwsController],
     imports: [
         ConfigModule.forRoot({
             envFilePath: ['.env'],
@@ -26,7 +28,7 @@ import { Images } from "./parts-guides-aws/images.model";
             username: process.env.POSTGRES_USER,
             password: process.env.POSTGRES_PASSWORD,
             database: process.env.POSTGRES_DB,
-            models: [Images],
+            models: [Image],
             autoLoadModels: true,
             // dialectOptions: {
             //     ssl: {
@@ -35,7 +37,9 @@ import { Images } from "./parts-guides-aws/images.model";
             //     }
             // }
         }),
-        PartsGuidesAwsModule
+        ImageSearchModule,
+        ImageAwsModule,
+        ImageSearchModule
     ],
     providers: [
         // {

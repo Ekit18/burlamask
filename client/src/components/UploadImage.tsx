@@ -1,20 +1,21 @@
-import React, { useRef, useState } from 'react'
+import React, { useContext, useRef, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import { Form } from 'react-bootstrap';
-import { ALLOWED_IMAGE_FORMAT } from '../utils/constants';
+import { ALLOWED_IMAGE_FORMAT, IMAGE_CARD_SIZE } from '../utils/constants';
+import { Context } from '..';
+import { DragDropIcon } from '../ui/icons';
 
-interface UploadImageProps {
-    setImages: React.Dispatch<React.SetStateAction<File[]>>
-}
 
-export const UploadImage: React.FC<UploadImageProps> = observer(({ setImages }) => {
+export const UploadImage: React.FC = observer(() => {
+    const { images } = useContext(Context)
     const [drag, setDrag] = useState<boolean>(false)
     const inputRef = useRef<HTMLInputElement>(null);
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (!event.target.files || event.target.files.length === 0) {
             return;
         }
-        setImages((prev) => [...prev, event.target.files![0]]);
+        images.addImages(event.target.files![0])
+        // setImages((prev) => [...prev,]);
     };
 
     const handleClick = () => {
@@ -47,20 +48,20 @@ export const UploadImage: React.FC<UploadImageProps> = observer(({ setImages }) 
             console.log('Invalid file format');
             return;
         }
-        setImages((prev) => [...prev, file]);
+        images.addImages(file)
         console.log(file)
         setDrag(false)
     }
 
     return (
-        <div className="d-flex">
+        <div className="d-flex" style={{ cursor: "pointer" }}>
             {drag
                 ? <div
                     className="p-2 d-flex text-center justify-content-center
                     align-items-center"
                     style={{
-                        height: "300px",
-                        width: "300px",
+                        height: IMAGE_CARD_SIZE,
+                        width: IMAGE_CARD_SIZE,
                         border: "dashed"
                     }}
                     onDragStart={(event) => dragStartHandler(event)}
@@ -73,6 +74,10 @@ export const UploadImage: React.FC<UploadImageProps> = observer(({ setImages }) 
                 : <div
                     className=" border p-2 d-flex text-center justify-content-center
                     align-items-center"
+                    style={{
+                        height: IMAGE_CARD_SIZE,
+                        width: IMAGE_CARD_SIZE,
+                    }}
                     onClick={handleClick}
                     onDragStart={(event) => dragStartHandler(event)}
                     onDragLeave={(event) => dragLeaveHandler(event)}
@@ -85,9 +90,12 @@ export const UploadImage: React.FC<UploadImageProps> = observer(({ setImages }) 
                             id="file"
                             name="file"
                             type="file"
-                            accept={ALLOWED_IMAGE_FORMAT.join(" ")}
+                            accept={ALLOWED_IMAGE_FORMAT.map((format) => `image/${format.replace('.', '')}`).join(',')}
                             onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleFileChange(event)} />
-                        Drag file to upload
+                        <div className="d-flex flex-column text-center justify-content-center align-items-center">
+                            Drag file to upload
+                            <DragDropIcon />
+                        </div>
                     </Form.Group>
                 </div>}
         </div>

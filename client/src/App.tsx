@@ -17,11 +17,11 @@ const App = observer(() => {
     }
 
     return (
-        // <React.StrictMode>
+        <React.StrictMode>
             <BrowserRouter>
                 <AppRouter />
             </BrowserRouter>
-        // </React.StrictMode>
+        </React.StrictMode>
     );
 })
 

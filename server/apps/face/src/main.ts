@@ -10,8 +10,8 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
   const httpAdapter = app.get(HttpAdapterHost);
   app.useGlobalFilters(new AllExceptionsFilter(httpAdapter));
-  app.connectMicroservice(rmqService.getOptions(CAR_QUEUE));
+  app.connectMicroservice(rmqService.getOptions("face"));
   await app.startAllMicroservices();
-  await app.listen(PORT, () => console.log(`Started CAR server on port ${PORT}...🚀🌟 `));
+  await app.listen(PORT, () => console.log(`Started FACE server on port ${PORT}...🚀🌟 `));
 }
 bootstrap();

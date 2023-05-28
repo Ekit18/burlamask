@@ -7,10 +7,10 @@ import { FaceService } from './face.service';
 export class FacedRmqController {
     constructor(private FaceService: FaceService, private readonly rmqService: RmqService) { }
 
-    @MessagePattern({ role: "Face", cmd: 'getFaceById' })
-    findOneByPartId(@Payload() FaceId: number, @Ctx() context: RmqContext) {
-        this.rmqService.ack(context);
-        console.log(FaceId);
-        return this.FaceService.getFaceById(FaceId);
-    }
+    // @MessagePattern({ role: "Face", cmd: 'getFaceById' })
+    // findOneByPartId(@Payload() FaceId: number, @Ctx() context: RmqContext) {
+    //     this.rmqService.ack(context);
+    //     console.log(FaceId);
+    //     return this.FaceService.getFaceById(FaceId);
+    // }
 }

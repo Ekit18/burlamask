@@ -3,16 +3,12 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { APP_FILTER } from "@nestjs/core";
 import { SequelizeModule } from "@nestjs/sequelize";
 import { AllExceptionsFilter, User, Role, UserRoles, Brand, Car, CarOperation, CarServices, CarsParts, Crashes, Part, PartsGuidesAWS, PartsShop, RepairsHistory, ShopStockList, UserCars, RmqModule, RmqService } from "inq-shared-lib";
-import { BrandModule } from "./brand/brand.module";
-import { CarModule } from "./car/car.module";
-import { UserCarsModule } from "./user-cars/user-cars.module";
-import { BrandRmqController } from "./brand/brand-rmq.controller";
-import { CardRmqController } from "./car/car-rmq.controller";
-import { UserCarsRmqController } from "./user-cars/user-cars-rmq.controller";
+import { FaceModule } from "./face/face.module";
+import { Image } from "apps/aws/model/images.model";
 
 
 @Module({
-    controllers: [BrandRmqController, CardRmqController, UserCarsRmqController],
+    controllers: [],
     imports: [
         ConfigModule.forRoot({
             envFilePath: ['.env'],
@@ -28,7 +24,7 @@ import { UserCarsRmqController } from "./user-cars/user-cars-rmq.controller";
             username: process.env.POSTGRES_USER,
             password: process.env.POSTGRES_PASSWORD,
             database: process.env.POSTGRES_DB,
-            models: [User, Role, UserRoles, Brand, Car, Part, CarsParts, UserCars, ShopStockList, PartsShop, CarServices, CarOperation, PartsGuidesAWS, RepairsHistory, Crashes],
+            models: [Image],
             autoLoadModels: true,
             // dialectOptions: {
             //     ssl: {
@@ -37,9 +33,7 @@ import { UserCarsRmqController } from "./user-cars/user-cars-rmq.controller";
             //     }
             // }
         }),
-        BrandModule,
-        CarModule,
-        UserCarsModule,
+        FaceModule,
     ],
     providers: [
         // {
@@ -53,14 +47,6 @@ import { UserCarsRmqController } from "./user-cars/user-cars-rmq.controller";
         {
             provide: APP_FILTER,
             useClass: AllExceptionsFilter,
-        },
-        {
-            provide: RmqService,
-            useFactory: (configService: ConfigService) => {
-                console.log(`POSTGRES:::::::${process.env.POSTGRES_HOST}`);
-                return new RmqService(configService);
-            },
-            inject: [ConfigService],
         },
     ],
 })

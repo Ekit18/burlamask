@@ -1,8 +1,7 @@
 
 import { ReactComponent as Google } from './google.svg'
-import Service from './service.svg'
-import ReactDOMServer from 'react-dom/server';
-import L from 'leaflet';
+import { ReactComponent as DragDrop } from './drag-drop.svg'
+import { ReactComponent as Delete } from './Trash.svg'
 
 export const GoogleIcon = () => {
     return (
@@ -11,19 +10,16 @@ export const GoogleIcon = () => {
 }
 
 
-export const CrashIcon = L.icon({
-    iconSize: [25, 41],
-    iconAnchor: [10, 41],
-    popupAnchor: [2, -40],
-    iconUrl: "https://unpkg.com/leaflet@1.6/dist/images/marker-icon.png",
-    shadowUrl: "https://unpkg.com/leaflet@1.6/dist/images/marker-shadow.png",
-});
+export const DragDropIcon = () => {
+    return (
+        <DragDrop />
+    )
+}
+
+export const DeleteIcon = () => {
+    return (
+        <Delete />
+    )
+}
 
 
-export const ServiceIcon = L.icon({
-    iconSize: [25, 41],
-    iconAnchor: [10, 41],
-    popupAnchor: [2, -40],
-    iconUrl: Service,
-    shadowUrl: "https://unpkg.com/leaflet@1.6/dist/images/marker-shadow.png",
-});

@@ -5,19 +5,16 @@ import { HttpService } from '@nestjs/axios';
 import { Injectable, HttpException, HttpStatus, Inject } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { PartsGuidesAWS, PARTS_QUEUE, Part, GetPartTypesByBrandDTO, getAllStaticByBrandAndTypeDTO } from 'inq-shared-lib';
-import { FilesErrorObject } from './parts-guides-aws.controller';
+import { FilesErrorObject } from './image-aws.controller';
 import { ConfigService } from '@nestjs/config';
 import { ClientProxy } from "@nestjs/microservices";
 import { lastValueFrom } from 'rxjs';
 import { HttpStatusCode } from 'axios';
 import { Image } from 'apps/aws/model/images.model';
 
-type FileType = 'Part' | 'Guide';
-export interface StaticFile {
-    id: number,
-    url: string,
-    key: string,
-    description: string
+export interface AWSImage {
+    imageId: number,
+    url: string
 }
 
 @Injectable()
@@ -60,19 +57,29 @@ export class ImageAwsService {
         }
     }
 
-    async addImage(dataBuffer: Buffer, filename:string, description: string) {
+    async addImage(dataBuffer: Buffer, filename: string, description: string) {
         const newFile = await this.uploadPublicFile(dataBuffer, filename, description);
-        return newFile.url;
+        return newFile.imageId;
+    }
+    async addModifiedImage(dataBuffer: Buffer, filename: string, description: string): Promise<AWSImage> {
+        console.log(filename);
+        const newFile = await this.uploadPublicFile(dataBuffer, filename, description);
+        return { imageId: newFile.imageId, url: newFile.url };
     }
 
-    private async uploadPublicFile(dataBuffer: Buffer, filename:string, description: string) {
+    private async uploadPublicFile(dataBuffer: Buffer, filename: string, description: string) {
+        console.log("UPLOADUPLOAD");
+        console.log(filename);
+        console.log(dataBuffer);
+        console.log(`image/${filename.split('.')[1]}`);
         const uploadParams = {
-            Bucket: this.configService.get('AWS_PUBLIC_BUCKET_NAME'),
+            Bucket: 'parts-guides',
             Body: dataBuffer,
-            Key: `${uuid()}-${description}`,
+            Key: `${uuid()}`,
             ContentDisposition: 'inline;',
             ContentType: `image/${filename.split('.')[1]}`
         };
+        console.log(uploadParams);
         await this.s3Client.send(new PutObjectCommand(uploadParams));
         const fileUrl = `https://${uploadParams.Bucket}.s3.${await this.s3Client.config.region()}.amazonaws.com/${uploadParams.Key}`;
         await this.imageRepository.create({

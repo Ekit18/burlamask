@@ -8,7 +8,7 @@ RUN npm install
 
 COPY . .
 
-RUN npm run build car
+RUN npm run build face
 
 FROM node:alpine as production
 
@@ -25,4 +25,4 @@ COPY . .
 
 COPY --from=development /usr/src/app/dist ./dist
 
-CMD ["node", "dist/apps/car/main"]
+CMD ["node", "dist/apps/face/main"]
