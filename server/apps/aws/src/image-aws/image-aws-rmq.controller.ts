@@ -13,6 +13,11 @@ interface IndexImagePayload {
     imageId: number,
     description: string;
 }
+
+interface RMQBuffer extends Buffer {
+    data: number[]
+}
+
 @Controller()
 export class ImageAwsRmqController {
     constructor(
@@ -27,7 +32,7 @@ export class ImageAwsRmqController {
         console.log("RMQMRMQ");
         console.log(payload.file);
         console.log(payload.file.originalname);
-        return this.imageAwsService.addImage(Buffer.from(payload.file.buffer.data), payload.file.originalname, payload.description);
+        return this.imageAwsService.addImage(Buffer.from((payload.file.buffer as RMQBuffer).data), payload.file.originalname, payload.description);
     }
     @MessagePattern({ role: "aws", cmd: 'addModifiedImage' })
     addModifiedImage(@Payload() payload: AddImagePayload, @Ctx() context: RmqContext) {
@@ -35,7 +40,7 @@ export class ImageAwsRmqController {
         console.log("RMQMRMQ222222222222222222222222222222");
         console.log(payload);
         console.log(payload.file.originalname);
-        return this.imageAwsService.addModifiedImage(Buffer.from(payload.file.buffer.data), payload.file.originalname, payload.description);
+        return this.imageAwsService.addModifiedImage(Buffer.from((payload.file.buffer as RMQBuffer).data), payload.file.originalname, payload.description);
     }
 
     @MessagePattern({ role: "elastic", cmd: 'indexImage' })
