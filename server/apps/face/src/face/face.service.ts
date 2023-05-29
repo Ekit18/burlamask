@@ -10,24 +10,22 @@ import { lastValueFrom } from "rxjs";
 import { Request, Response } from 'express';
 
 interface AWSImage {
-    imageId: number,
-    url: string
+    id: number,
+    url: string,
+    description: string
 }
 
 @Injectable()
 export class FaceService {
     constructor(@Inject(AWS_QUEUE) private awsClient: ClientProxy) { }
     async handleAllFaces(files: Array<Express.Multer.File>, descriptions, detections: Detection) {
-        // TODO: Add originals to DB
-        const addedOriginalImageIds: number[] = await Promise.all(files.map(async (file, index) => {
-            const imageId: number = await lastValueFrom(this.awsClient.send({ role: "aws", cmd: 'addImage' }, { file, description: descriptions[index] }));
-            return imageId;
-        }));
-        // // TODO: Index originals
-        await Promise.all(addedOriginalImageIds.map(async (imageId, index) => {
-            await this.awsClient.send({ role: "rmq", cmd: 'indexImage' }, { imageId, description: descriptions[index] });
-        }));
-        // TODO: Create modified images
+        // const addedOriginalImageIds: number[] = await Promise.all(files.map(async (file, index) => {
+        //     const imageId: number = await lastValueFrom(this.awsClient.send({ role: "aws", cmd: 'addImage' }, { file, description: descriptions[index] }));
+        //     return imageId;
+        // }));
+        // await Promise.all(addedOriginalImageIds.map(async (imageId, index) => {
+        //     await this.awsClient.send({ role: "elastic", cmd: 'indexImage' }, { imageId, description: descriptions[index] });
+        // }));
         const modifiedImages: Array<Buffer> = await Promise.all(files.map(async (file, index) => {
             let nextFile = null;
             let nextIndex = 0;
@@ -41,7 +39,6 @@ export class FaceService {
             const resultingImage = await this.changeImage(file, nextFile, detections[index], detections[nextIndex]);
             return resultingImage;
         }));
-        // // TODO: Add modified images to DB
         const addedModifiedImages: AWSImage[] = await Promise.all(modifiedImages.map(async (buffer, index) => {
             const file = {
                 buffer,
@@ -53,41 +50,69 @@ export class FaceService {
             } else {
                 nextIndex = 0;
             }
-            const imageIdAndUrl: AWSImage = await lastValueFrom(this.awsClient.send({ role: "aws", cmd: 'addModifiedImage' }, { file, description: `test.jpg` }));
-            return imageIdAndUrl;
+            const surname1 = descriptions[index];
+            const surname2 = descriptions[nextIndex];
+            const description = `${surname2}'s body with ${surname1}'s face`;
+            const imageIdAndUrl: AWSImage = await lastValueFrom(this.awsClient.send({ role: "aws", cmd: 'addModifiedImage' }, { file, description }));
+            return { ...imageIdAndUrl, description };
         }));
-        // // TODO: Index modified images
-        await Promise.all(addedModifiedImages.map(async ({ imageId }, index) => {
-            await this.awsClient.send({ role: "rmq", cmd: 'indexImage' }, { imageId, description: descriptions[index] });
+        await Promise.all(addedModifiedImages.map(async ({ id, description }, index) => {
+            const test: any = await lastValueFrom(this.awsClient.send({ role: "elastic", cmd: 'indexImage' }, { id, description }));
         }));
-        // // TODO: Return modified
-        return addedModifiedImages.map((awsImage) => awsImage.url);
+        return addedModifiedImages.map((awsImage) => ({
+            url: awsImage.url, description: awsImage.description, id: awsImage.id
+        }));
     }
-
-    // async addToAWSAndElastic(files: Array<Express.Multer.File> | Array<Buffer> | Array<OurFile>) {
-    //     if (files[0]) {
-    //         const files = files.map((buffer) => ({
-    //             buffer,
-    //             originalName: `image.png`
-    //         }));
-    //     }
-    //     // TODO: Add originals to DB
-    //     const addedOriginalImageIds: number[] = await Promise.all(files.map(async (file, index) => {
-    //         const imageId: number = await lastValueFrom(this.awsClient.send({ role: "aws", cmd: 'addImage' }, { file, description: descriptions[index] }));
-    //         return imageId;
-    //     }));
-    //     // TODO: Index originals
-    //     await Promise.all(files.map(async (file, index) => {
-    //         await this.awsClient.send({ role: "rmq", cmd: 'indexImage' }, { file, description: descriptions[index] });
-    //     }));
-    // }
 
     async changeImage(imageToCrop: Express.Multer.File, backgroundImage: Express.Multer.File, detections1, detections2) {
         const intDetections1 = Object.fromEntries(Object.entries(detections1).map(([key, value]: [key: string, value: number]) => [key, Math.floor(value)]));
         const intDetections2 = Object.fromEntries(Object.entries(detections2).map(([key, value]: [key: string, value: number]) => [key, Math.floor(value)]));
-        const img1 = await sharp(imageToCrop.buffer).extract({ width: intDetections1.width, height: intDetections1.height, left: intDetections1.left, top: intDetections1.top }).toBuffer();
+        console.log(imageToCrop.mimetype);
+        console.log(`<svg><ellipse cx="${intDetections1.left + (intDetections1.width / 2)}" cy="${intDetections1.top + (intDetections1.height / 2)}" rx="${intDetections1.left / 2}" ry="${intDetections1.width / 2}" /></svg>`);
+        console.log(intDetections1.top);
+        const img1 = await sharp(imageToCrop.buffer)
+
+            // .composite([{
+            //     input: Buffer.from(`<svg><ellipse cx="${(intDetections1.height / 2) - 25}" cy="${(intDetections1.width / 2) + 30}" rx="${100}" ry="${100}" /></svg>`),
+            //     blend: 'dest-in'
+            // }])
+            .extract({ width: intDetections1.width, height: intDetections1.height, left: intDetections1.left, top: intDetections1.top })
+            // .composite([{
+            //     input: Buffer.from(`<svg><ellipse cx="${intDetections1.width}" cy="${80}" rx="${intDetections1.left / 2}" ry="${intDetections1.width / 2}" /></svg>`),
+            //     blend: 'dest-in'
+            // }])
+            .composite([{
+                input: Buffer.from(`<svg width="${intDetections1.width}" height="${intDetections1.height}">
+        <defs>
+            <filter id="blurMe">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="9" />
+            </filter>
+        </defs>
+        <ellipse cx="${intDetections1.width / 2}" cy="${intDetections1.height / 2}" rx="${intDetections1.width / 2}" ry="${intDetections1.height / 2}"  filter="url(#blurMe)"/>
+    </svg>`),
+                blend: 'dest-in'
+            }])
+            .webp()
+            // .resize({ width: 10 })
+            //   .extract({
+            //     width: 150,
+            //     height: 150,
+            //     left: 150,
+            //     top: 150
+            // })
+            .toBuffer();
+        const img1Temp = await sharp(img1)
+            .resize({ height: intDetections2.height, width: intDetections2.width, fit: "fill" })
+            .toBuffer();
+        // const img2 = await sharp(backgroundImage.buffer).composite([{
+        //     input: img1,
+        //     top: 0,
+        //     left: 0
+        // }]).toBuffer();
+
+        // const img1 = await sharp(imageToCrop.buffer).extract({ width: intDetections1.width, height: intDetections1.height, left: intDetections1.left, top: intDetections1.top }).toBuffer();
         const img2 = await sharp(backgroundImage.buffer).composite([{
-            input: img1,
+            input: img1Temp,
             top: intDetections2.top,
             left: intDetections2.left
         }]).toBuffer();

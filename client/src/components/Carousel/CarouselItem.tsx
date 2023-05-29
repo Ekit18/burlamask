@@ -16,7 +16,7 @@ export const CarouselItem: React.FC<CarouselItemProps> = observer(({ description
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
-                overflow: "hidden"
+                // overflow: "hidden"
             }}>
                 {children}
             </div>

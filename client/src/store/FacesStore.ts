@@ -1,6 +1,8 @@
 import { action, makeAutoObservable } from "mobx";
 import { addFaces, deleteFaces, changeFaces, fetchFaces, uploadFaces } from "../http/faceApi";
-import { ImageData } from "./ImagesStore";
+import ImagesStore, { ImageData, SwappedImageData } from "./ImagesStore";
+import { Buffer } from 'buffer';
+
 export type FaceData = {
     file: File,
     detection: FaceDetection,
@@ -59,13 +61,24 @@ export default class FacesStore {
         }))
     }
 
-    // findFaceById(faceId: number) {
-    //     return this._faces.find((item) => item.id === faceId)
-    // }
+    findFaceByFileSizeAndName(fileSize: number, name:string) {
+        return this._faces.find((item) => item.file.size === fileSize && item.file.name === name);
+    }
 
-    uploadFaces() {
-        return uploadFaces(this._faces).then(action((data) => {
+    uploadFaces(images: ImagesStore) {
+        return uploadFaces(this._faces).then(action((data:SwappedImageData[]) => {
             console.log(data)
+            // const result = data.map((imageData: { data: number[] }, index: number) => {
+            //     const buffer = Buffer.from(imageData.data);
+
+            //     const base64Image = buffer.toString('base64');
+            //     const imageFormat = images.images[index].file.type
+            //     const oldName = images.images[index].file.name
+            //     const dataUrl = `data:image/${imageFormat};base64,${base64Image}`;
+            //     return { file: dataUrl, oldName };
+            // })
+            // console.log(result)
+            images.setSwappedImages(data)
         }))
     }
 }

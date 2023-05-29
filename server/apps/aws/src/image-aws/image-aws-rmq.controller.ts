@@ -10,7 +10,7 @@ interface AddImagePayload {
     originalName: string;
 }
 interface IndexImagePayload {
-    imageId: number,
+    id: number,
     description: string;
 }
 
@@ -45,8 +45,9 @@ export class ImageAwsRmqController {
 
     @MessagePattern({ role: "elastic", cmd: 'indexImage' })
     indexImages(@Payload() payload: IndexImagePayload, @Ctx() context: RmqContext) {
+        console.log("INDEXINDEXINDEXINDEXINDEXINDEXINDEXINDEXINDEXINDEXINDEXINDEXINDEXINDEXINDEX");
         this.rmqService.ack(context);
         console.log(payload);
-        return this.searchService.indexImages(payload.imageId, payload.description);
+        return this.searchService.indexImages(payload.id, payload.description);
     }
 }

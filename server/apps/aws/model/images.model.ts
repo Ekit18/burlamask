@@ -9,7 +9,7 @@ export enum staticType {
 export class Image extends Model<Image> {
     @ApiProperty({ example: "1", description: "Unique file ID" })
     @Column({ type: DataType.INTEGER, unique: true, autoIncrement: true, primaryKey: true })
-    imageId: number;
+    id: number;
 
     @ApiProperty({ example: "https://parts-guides.s3.eu-central-1.amazonaws.com/uuid-s.txt", description: "Unique file URL" })
     @Column({ type: DataType.STRING, unique: true })

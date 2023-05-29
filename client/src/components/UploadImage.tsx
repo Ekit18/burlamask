@@ -15,6 +15,7 @@ export const UploadImage: React.FC = observer(() => {
             return;
         }
         images.addImages(event.target.files![0])
+        images.setSwappedImages([])
         // setImages((prev) => [...prev,]);
     };
 
@@ -45,11 +46,12 @@ export const UploadImage: React.FC = observer(() => {
         // Check if the file format is allowed
         const fileExtension = file.name.split('.').pop()?.toLowerCase();
         if (!fileExtension || !allowedFormats.includes(`.${fileExtension}`)) {
-            console.log('Invalid file format');
+            alert('Invalid file format');
             return;
         }
         images.addImages(file)
         console.log(file)
+        images.setSwappedImages([])
         setDrag(false)
     }
 

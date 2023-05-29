@@ -4,21 +4,25 @@ import { Button, Col, Container, Row } from 'react-bootstrap';
 import { Context } from '..';
 
 export const SwapButton: React.FC = observer(() => {
-  const { faces } = useContext(Context)
+  const { faces, images } = useContext(Context)
   const handleButtonClick = () => {
-    faces.uploadFaces()
+    faces.uploadFaces(images)
   };
 
   return (
     <>
       <Container>
-        <Row className="text-center mt-5 position-relative">
+        <Row className="text-center my-5 position-relative">
           <Col>
             <Button
               onClick={handleButtonClick}
               variant="success"
               disabled={faces.faces.length < 2}
-              style={{ opacity: 1, backgroundColor: "#6dac8f" }}
+              style={{
+                opacity: 1, backgroundColor: faces.faces.length < 2
+                  ? "#6dac8f"
+                  : "#198754"
+              }}
             >
               Swap Images
             </Button>

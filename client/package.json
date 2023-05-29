@@ -15,6 +15,7 @@
     "bootstrap": "^5.2.3",
     "buffer": "^6.0.3",
     "compress.js": "^1.2.2",
+    "compressorjs": "^1.2.1",
     "date-fns": "^2.29.3",
     "dotenv": "^16.0.3",
     "face-api.js": "^0.22.2",

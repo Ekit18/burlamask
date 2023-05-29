@@ -8,27 +8,26 @@ import { observer } from 'mobx-react-lite';
 
 const Carousel: React.FC = observer(() => {
   const { images } = useContext(Context);
-  const [currentIndex, setCurrentIndex] = useState<number>(0);
 
   const nextSlide = (): void => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % images.images.length);
+    images.setCurrentCarouselIndex((images.currentCarouselIndex + 1) % images.images.length);
   };
 
   const prevSlide = (): void => {
-    setCurrentIndex((prevIndex) =>
-    (prevIndex === 0
+    images.setCurrentCarouselIndex(
+    (images.currentCarouselIndex === 0
       ? images.images.length - 1
-      : prevIndex - 1)
+      : images.currentCarouselIndex - 1)
     );
   };
 
   const renderImages = (): JSX.Element[] => {
     const endIndex: number =
-      currentIndex + 3 > images.images.length
+      images.currentCarouselIndex + 3 > images.images.length
         ? images.images.length
-        : currentIndex + 3;
+        : images.currentCarouselIndex + 3;
     return images.images
-      .slice(currentIndex, endIndex)
+      .slice(images.currentCarouselIndex, endIndex)
       .map((image) => (
         <CarouselItem key={image.file.name}>
           <FaceImage file={image.file} />
@@ -37,7 +36,7 @@ const Carousel: React.FC = observer(() => {
   };
 
   const renderUploadImage = (): JSX.Element | null => {
-    if (currentIndex + 3 > images.images.length) {
+    if (images.currentCarouselIndex + 3 > images.images.length) {
       return (
         <CarouselItem>
           <UploadImage />

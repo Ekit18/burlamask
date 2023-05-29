@@ -3,7 +3,7 @@ import { Injectable } from "@nestjs/common";
 import { ElasticsearchService } from '@nestjs/elasticsearch';
 
 interface ImageSearchBody {
-  imageId: number,
+  id: number,
   description: string
 }
 interface ImageSearchResult {
@@ -23,17 +23,18 @@ export default class ImageSearchService {
     private readonly elasticsearchService: ElasticsearchService) { }
 
 
-  indexImages(imageId: number, description: string) {
+  indexImages(id: number, description: string) {
     return this.elasticsearchService.index<ImageSearchBody>({
       index: this.index,
       document: {
-        imageId,
+        id,
         description
       }
     });
   }
 
   async search(description: string) {
+    console.log(description);
     const response = await this.elasticsearchService.search<ImageSearchBody>({
       index: this.index,
       query: {
@@ -47,12 +48,12 @@ export default class ImageSearchService {
     return { result: hits.map((item) => item._source) };
   }
 
-  remove(imageId: number) {
+  remove(id: number) {
     this.elasticsearchService.deleteByQuery({
       index: this.index,
       query: {
         match: {
-          imageId
+          id
         },
       },
     });

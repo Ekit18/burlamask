@@ -1,17 +1,35 @@
 import { action, makeAutoObservable } from "mobx";
+import { searchAwsImg } from "../http/awsApi/awsApi";
 
 export type ImageData = {
     file: File,
 }
 
+export type SwappedImageData = {
+    id: number
+    url: string,
+    description: string
+}
+
 
 export default class ImagesStore {
     _images: Array<ImageData>
-    _swappedImages: Array<string>
+    _swappedImages: Array<SwappedImageData>
+    _currentCarouselIndex: number
     constructor() {
         this._images = []
         this._swappedImages = []
+        this._currentCarouselIndex = 0
         makeAutoObservable(this)
+    }
+
+
+    setCurrentCarouselIndex(currentCarouselIndex: number) {
+        this._currentCarouselIndex = currentCarouselIndex
+    }
+
+    get currentCarouselIndex() {
+        return this._currentCarouselIndex
     }
 
     setImages(images: ImageData[]) {
@@ -22,7 +40,7 @@ export default class ImagesStore {
         return this._images
     }
 
-    setSwappedImages(swappedImages: string[]) {
+    setSwappedImages(swappedImages: SwappedImageData[]) {
         this._swappedImages = swappedImages
     }
 
@@ -63,9 +81,12 @@ export default class ImagesStore {
     //     return this._images.find((item) => item.id === imageId)
     // }
 
-    loadImages(userId: number) {
-        // return fetchImages(userId).then(action((images: ImageData[]) => {
-        //     this._images = images
-        // }))
+    searchImages(description: string) {
+        return searchAwsImg(description).then(action((data: SwappedImageData[]) => {
+            const newArray = [...data, ...this._swappedImages]
+            this.setSwappedImages(newArray.filter((value, index, self) =>
+                self.findIndex((v) => v.id === value.id) === index
+            ));
+        }))
     }
 }

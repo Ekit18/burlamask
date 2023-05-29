@@ -9,6 +9,8 @@ import { GetImageDTO } from 'apps/aws/dto/get-image.dto';
 import { Image } from 'apps/aws/model/images.model';
 import { DeleteImageDTO } from 'apps/aws/dto/delete-image.dto';
 import { CreateImageDTO } from 'apps/aws/dto/create-image.dto';
+import ImageSearchService from '../image-aws-search/image-search.service';
+import { SearchImageDTO } from 'apps/aws/dto/search.dto';
 
 export type FilesErrorObject = {
     isError: boolean,
@@ -21,7 +23,8 @@ export class ImageAwsController {
     @Inject()
     static configService: ConfigService;
     constructor(
-        private ImageAwsService: ImageAwsService
+        private ImageAwsService: ImageAwsService,
+        private SearchService: ImageSearchService
     ) { }
 
     static imageFilter(req: Request, file: Express.Multer.File, callback: (error: Error, acceptFile: boolean) => void) {
@@ -36,6 +39,11 @@ export class ImageAwsController {
         }
         console.log(config.MAX_FILE_SIZE);
         callback(null, true);
+    }
+
+    @Post('/search')
+    searchDescription(@Body() query: SearchImageDTO) {
+        return this.ImageAwsService.searchForImages(query.query);
     }
 
 

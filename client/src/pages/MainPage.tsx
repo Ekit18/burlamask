@@ -9,6 +9,7 @@ import Carousel from '../components/Carousel/Carousel'
 import { UploadImage } from '../components/UploadImage'
 import { Context } from '..'
 import { SwapButton } from '../components/SwapButton'
+import { SwappedImages } from '../components/SwappedImages'
 
 
 const MainPage: React.FC = observer(() => {
@@ -21,6 +22,7 @@ const MainPage: React.FC = observer(() => {
       <Carousel />
       {/* <h2>user id: {user.userId}</h2> */}
       <SwapButton />
+      <SwappedImages />
       {/* <Button onClick={() => user.logOut()} className="me-5 ms-3">log out</Button> */}
     </>
   )

@@ -41,30 +41,19 @@ export class FaceController {
             throw new HttpException(`${FaceController.errObj.msg}test`, HttpStatus.BAD_REQUEST);
         }
         // console.log("test");
-        // await FaceService.checkNSFWFiles(files, FaceController.errObj);
-        // if (FaceController.errObj.isError) {
-        //     throw new HttpException(FaceController.errObj.msg, HttpStatus.BAD_REQUEST);
-        // }
-        console.log(files[0].buffer);
-        // {
-        // descriptions: string[],
-        // detections: Detection[],
-        // files: Buffer[]
-        // }
-        // 2023-05-28 15:40:40 {
-        // 2023-05-28 15:40:40   fieldname: 'file',
-        // 2023-05-28 15:40:40   originalname: '000N7AIAFT.jpg',
-        // 2023-05-28 15:40:40   encoding: '7bit',
-        // 2023-05-28 15:40:40   mimetype: 'image/jpeg',
-        // 2023-05-28 15:40:40   buffer: <Buffer ff d8 ff e0 00 10 4a 46 49 46 00 01 01 00 00 01 00 01 00 00 ff db 00 43 00 08 06 06 07 06 05 08 07 07 07 09 09 08 0a 0c 14 0d 0c 0b 0b 0c 19 12 13 0f ... 89222 more bytes>,
-        // 2023-05-28 15:40:40   size: 89272
-        // 2023-05-28 15:40:40 }
-        // 2023-05-28 15:40:40 [Object: null prototype] {
-        // 2023-05-28 15:40:40   detections: '[{"width":153.33304256945848,"height":191.53843656554818,"top":61.135043283091406,"left":73.7217373760326},{"width":159.07767963409424,"height":185.96794247627258,"top":69.10345960295301,"left":70.87107754037297}]',
-        // 2023-05-28 15:40:40   descriptions: '["000N7AIAFT.jpg","00H858UYSD.jpg"]'
-        // 2023-05-28 15:40:40 }
+        // // await FaceService.checkNSFWFiles(files, FaceController.errObj);
+        // // if (FaceController.errObj.isError) {
+        // //     throw new HttpException(FaceController.errObj.msg, HttpStatus.BAD_REQUEST);
+        // // }
+        console.log(files[0].mimetype);
         const result = await this.faceService.handleAllFaces(files, JSON.parse(dto.descriptions), JSON.parse(dto.detections));
         return result;
+        // return [
+        //     { id: 1, url: "https://parts-guides.s3.eu-central-1.amazonaws.com/73f3391e-0f7b-409e-8ee8-71f68835668a", description: "test1" },
+        //     { id: 2, url: "https://parts-guides.s3.eu-central-1.amazonaws.com/55094875-bffa-46ec-9fb5-58b99f4c43ed", description: "test2" },
+        //     { id: 3, url: "https://parts-guides.s3.eu-central-1.amazonaws.com/96d2ec38-e3c1-4ba2-9eb2-52f649f7d0ff", description: "test3" },
+
+        // ];
     }
 
     @Get()

@@ -11,9 +11,10 @@ import { ClientProxy } from "@nestjs/microservices";
 import { lastValueFrom } from 'rxjs';
 import { HttpStatusCode } from 'axios';
 import { Image } from 'apps/aws/model/images.model';
-
+import ImageSearchService from '../image-aws-search/image-search.service';
+import { Sequelize, Op } from "sequelize";
 export interface AWSImage {
-    imageId: number,
+    id: number,
     url: string
 }
 
@@ -25,6 +26,7 @@ export class ImageAwsService {
         @InjectModel(Image) private imageRepository: typeof Image,
         // @Inject(PARTS_QUEUE) private PartsClient: ClientProxy,
         private readonly s3Client: S3Client,
+        private ImageSearchService: ImageSearchService
     ) {
         this.baseURI = `https://${this.configService.get('AWS_PUBLIC_BUCKET_NAME')}.s3.${this.configService.get('AWS_REGION')}.amazonaws.com/`;
     }
@@ -51,7 +53,7 @@ export class ImageAwsService {
                 Key: candidate.key,
             };
             await this.s3Client.send(new DeleteObjectCommand(delParams));
-            return this.imageRepository.destroy({ where: { imageId } });
+            return this.imageRepository.destroy({ where: { id: imageId } });
         } catch (error) {
             throw new HttpException("CANNOT DELETE STATIC FILE!", HttpStatusCode.BadRequest);
         }
@@ -59,12 +61,12 @@ export class ImageAwsService {
 
     async addImage(dataBuffer: Buffer, filename: string, description: string) {
         const newFile = await this.uploadPublicFile(dataBuffer, filename, description);
-        return newFile.imageId;
+        return newFile.id;
     }
     async addModifiedImage(dataBuffer: Buffer, filename: string, description: string): Promise<AWSImage> {
         console.log(filename);
         const newFile = await this.uploadPublicFile(dataBuffer, filename, description);
-        return { imageId: newFile.imageId, url: newFile.url };
+        return { id: newFile.id, url: newFile.url };
     }
 
     private async uploadPublicFile(dataBuffer: Buffer, filename: string, description: string) {
@@ -126,5 +128,19 @@ export class ImageAwsService {
             throw new HttpException("ERROR_FROM_AXIOS: ", error);
         });
         return isNSFW;
+    }
+
+    async searchForImages(query: string) {
+        const results = await this.ImageSearchService.search(query);
+        const ids = results.result.map((result) => result.id);
+        console.log(ids);
+        const queryResult = await this.imageRepository.findAll({
+            where: {
+                id: {
+                    [Op.in]: ids
+                }
+            },
+        });
+        return { result: queryResult };
     }
 }

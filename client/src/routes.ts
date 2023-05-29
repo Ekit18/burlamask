@@ -1,7 +1,7 @@
 import MainPage from "./pages/MainPage"
 
 import {
-    MAIN_ROUTE,
+    MAIN_ROUTE
 } from "./utils/constants"
 
 
