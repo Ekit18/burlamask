@@ -4,10 +4,15 @@ import { Context } from '..';
 import { CarouselItem } from './Carousel/CarouselItem';
 import { Container } from 'react-bootstrap';
 import { FaceImage } from './FaceImage';
+import useCopyToClipboard from './useCopyToClipboard';
+import { CopyIcon } from '../ui/icons';
+import { SwappedImageItem } from './SwappedImageItem';
 
 
 export const SwappedImages: React.FC = observer(() => {
     const { images } = useContext(Context);
+
+
     // return (
     //     <>
     //     <div className="d-flex flex-column text-center align-items-center">
@@ -37,10 +42,7 @@ export const SwappedImages: React.FC = observer(() => {
             .slice(images.currentCarouselIndex, endIndex)
             .map((image) => (
                 <CarouselItem key={image.id}>
-                    <div className="d-flex flex-column align-items-center position-relative">
-                        <img src={image.url} alt={image.description} />
-                        <h4 className=" w-100 text-center" style={{ bottom: -10, backgroundColor: "white" }}>{image.description}</h4>
-                    </div>
+                   <SwappedImageItem image={image}/>
                 </CarouselItem>
             ));
     };

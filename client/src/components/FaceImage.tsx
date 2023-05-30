@@ -16,7 +16,6 @@ interface FaceImageProps {
 export const FaceImage: React.FC<FaceImageProps> = observer(({ file }) => {
     const { faces, images } = useContext(Context)
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const descriptionRef = useRef<HTMLInputElement>(null);
     const imgRef = useRef<HTMLImageElement>(null);
     const [imageURL, setImageURL] = useState<string>("");
     const [isHovered, setIsHovered] = useState(false);

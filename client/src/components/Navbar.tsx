@@ -13,7 +13,8 @@ import { Context } from '..';
 export const NavBar: React.FC = observer(() => {
   const { faces, images } = useContext(Context)
   const [description, setDescription] = useState<string>('');
-  const handleClick = () => {
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    event.preventDefault()
     if (!description.length) {
       alert("Query can't be empty")
     }
@@ -42,7 +43,7 @@ export const NavBar: React.FC = observer(() => {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
-            <Button variant="outline-success" onClick={handleClick}>Search</Button>
+            <Button variant="outline-success" type="submit" onClick={(event) => handleClick(event)}>Search</Button>
           </Form>
         </Navbar.Collapse>
         <hr />
