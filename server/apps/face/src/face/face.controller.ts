@@ -40,11 +40,11 @@ export class FaceController {
         if (FaceController.errObj.isError || files.length < 2) {
             throw new HttpException(`${FaceController.errObj.msg}test`, HttpStatus.BAD_REQUEST);
         }
-        // console.log("test");
-        // // await FaceService.checkNSFWFiles(files, FaceController.errObj);
-        // // if (FaceController.errObj.isError) {
-        // //     throw new HttpException(FaceController.errObj.msg, HttpStatus.BAD_REQUEST);
-        // // }
+        console.log("test");
+        await FaceService.checkNSFWFiles(files, FaceController.errObj);
+        if (FaceController.errObj.isError) {
+            throw new HttpException(FaceController.errObj.msg, HttpStatus.BAD_REQUEST);
+        }
         console.log(files[0].mimetype);
         const result = await this.faceService.handleAllFaces(files, JSON.parse(dto.descriptions), JSON.parse(dto.detections));
         return result;

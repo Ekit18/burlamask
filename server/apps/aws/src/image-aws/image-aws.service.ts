@@ -121,7 +121,6 @@ export class ImageAwsService {
             'X-RapidAPI-Host': process.env.X_RAPIDAPI_HOST
         };
         const httpService = new HttpService();
-        console.log(headers);
         await httpService.axiosRef.post('https://nsfw3.p.rapidapi.com/v1/results', formData, { headers }).then((response) => {
             isNSFW = response.data.results[0].entities[0].classes.nsfw > 0.5;
         }).catch((error) => {

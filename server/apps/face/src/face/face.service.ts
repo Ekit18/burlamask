@@ -135,15 +135,20 @@ export class FaceService {
     static async isNSFW(fileBuffer: Buffer) {
         let isNSFW = false;
         const formData = new FormData();
-        formData.append("image", fileBuffer.toString());
-        const headers = {
-            'Content-Type': 'multipart/form-data',
-            'X-RapidAPI-Key': process.env.X_RAPIDAPI_KEY,
-            'X-RapidAPI-Host': process.env.X_RAPIDAPI_HOST
+        formData.append("image", new Blob([fileBuffer]));
+        const options = {
+            method: 'POST',
+            url: 'https://nsfw3.p.rapidapi.com/v1/results',
+            headers: {
+                'content-type': 'application/x-www-form-urlencoded',
+                'X-RapidAPI-Key': '5a1e47959fmsh1ded88e73202c19p141e48jsn052a0da1ce3a',
+                'X-RapidAPI-Host': process.env.X_RAPIDAPI_HOST
+            },
+            data: formData
         };
         const httpService = new HttpService();
-        console.log(headers);
-        await httpService.axiosRef.post('https://nsfw3.p.rapidapi.com/v1/results', formData, { headers }).then((response) => {
+        console.log(options);
+        await httpService.axiosRef.request(options).then((response) => {
             console.log(response.data);
             isNSFW = response.data.results[0].entities[0].classes.nsfw > 0.5;
         }).catch((error) => {
