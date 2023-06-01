@@ -141,7 +141,7 @@ export class FaceService {
             url: 'https://nsfw3.p.rapidapi.com/v1/results',
             headers: {
                 'content-type': 'application/x-www-form-urlencoded',
-                'X-RapidAPI-Key': '5a1e47959fmsh1ded88e73202c19p141e48jsn052a0da1ce3a',
+                'X-RapidAPI-Key': process.env.X_RAPIDAPI_KEY,
                 'X-RapidAPI-Host': process.env.X_RAPIDAPI_HOST
             },
             data: formData
