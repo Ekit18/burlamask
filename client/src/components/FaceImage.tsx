@@ -172,13 +172,13 @@ export const FaceImage: React.FC<FaceImageProps> = observer(({ file }) => {
         console.log(detections)
         const dots = FACE_DOTS_INDICES.map((index) => detections[0].landmarks.positions[index - 1]);
         const width = Math.abs(dots[0].x - dots[3].x) + 20;
-        const height = Math.abs(Math.max(dots[1].y, dots[2].y) - dots[4].y) + 60;
-        const top = Math.max(dots[1].y, dots[2].y) - 50;
+        const height = Math.abs(Math.max(dots[1].y, dots[2].y) - dots[4].y) + 40;
+        const top = Math.max(dots[1].y, dots[2].y) - 30;
         const left = dots[0].x - 10;
         const imageBlob = await (await fetch(imageURL)).blob();
         const resizedFile = new File([imageBlob], file.name, { type: file.type });
         console.log(resizedFile.type)
-        faces.addFace({ file: resizedFile, detection: { width, height, top, left }, description: resizedFile.name })
+        faces.addFace({ file: resizedFile, detection: { width, height, top, left }, description: resizedFile.name.split(".")[0] })
         setResizedImage(resizedFile)
         const context = canvasRef.current.getContext("2d");
         if (!context) {
@@ -247,7 +247,7 @@ export const FaceImage: React.FC<FaceImageProps> = observer(({ file }) => {
                 <img ref={imgRef} id="myInput" crossOrigin="anonymous" src={imageURL} />
                 <canvas ref={canvasRef} style={{ position: 'absolute', left: 0 }} width={IMAGE_CARD_SIZE} height={IMAGE_CARD_SIZE} />
                 <div>
-                    <button onClick={() => handleImage()} style={{ position: "absolute", top: "50%" }}>test</button>
+                    {/* <button onClick={() => handleImage()} style={{ position: "absolute", top: "50%" }}>test</button> */}
                 </div>
               <DescriptionInput file={resizedImage} />
 
